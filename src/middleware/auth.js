@@ -13,10 +13,10 @@ export default async (req, res, next) => {
     if (req.headers.authorization && req.headers.authorization.split(" ")[0] === "Bearer") {
       const accessToken = req.headers.authorization.split(" ")[1];
       const verified = jwt.verify(accessToken, secretAccessToken);
-      req.user = verified;
+      req.user = verified.user;
       req.accessToken = accessToken;
       // verify blacklisted access token.
-      redisClient.get('BL_' + (verified.id).toString(), (err, data) => {
+      redisClient.get('BL_' + (verified.user.id).toString(), (err, data) => {
         if (err) {
           return sendErrorResponse(res, 401, err);
         }
