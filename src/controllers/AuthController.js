@@ -1,8 +1,8 @@
 import { Op } from 'sequelize'
 import model from '../models'
-import { generateToken } from "../helper/tokenHelper"
+import { generateAccessToken, generateRefreshToken } from "../helper/tokenHelper"
 import { sendErrorResponse, sendSuccessResponse } from '../helper/sendResponse';
-
+import redisClient from '../../redisConnect';
 const { User, Employee } = model;
 
 export default {
@@ -49,15 +49,17 @@ export default {
       let user = await User.findOne({ where: { userName: userName } })
       if (user) {
         // compare password
-        user.comparePassword(password, (error, isMatching) => {
+        user.comparePassword(password, async (error, isMatching) => {
           if (error || !isMatching) {
             return sendErrorResponse(res, 422, 'Wrong password')
           } else if (isMatching) {
             // generate jwt token
-            let token = generateToken(user)
+            let accessToken = generateAccessToken(user)
+            let refreshToken = generateRefreshToken(user)
             return sendSuccessResponse(res, 201, {
-              token: token,
-              data: user
+              accessToken,
+              refreshToken,
+              data: user,
             }, 'User logged in successfully.')
           } else {
             return sendErrorResponse(res, 422, 'Wrong password')
@@ -68,6 +70,23 @@ export default {
       console.log(error)
       return sendErrorResponse(res, 500, 'Could not perform operation at this time, kindly try again later.')
     }
+  },
+  async getToken(req, res) {
+    let user = req.user
+    let accessToken = generateAccessToken(user)
+    let refreshToken = generateRefreshToken(user)
+    return sendSuccessResponse(res, 201, {
+      accessToken,
+      refreshToken
+    })
+  },
+  async logout(req, res) {
+    const userId = req.user.id;
+    const accessToken = req.accessToken;
+    // remove the refresh token
+    await redisClient.del(userId.toString());
+    // blacklist current access token
+    await redisClient.set('BL_' + userId.toString(), accessToken);
+    return sendSuccessResponse(res, 201, null, "successfully logged out")
   }
-
 }

@@ -1,5 +1,5 @@
 {
   "exec": "npm run dev",
-  "watch": ["src/*","index.js"],
+  "watch": ["src/*","index.js","redisConnect.js"],
   "ext": "js, html, css, json"
 }

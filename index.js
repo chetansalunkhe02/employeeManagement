@@ -7,6 +7,7 @@ import isAdmin from "./src/middleware/isAdmin"
 import isEmployee from "./src/middleware/isEmployee"
 import "./src/config/config"
 
+const port = 5000;
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -15,11 +16,16 @@ app.use(express.json());
 app.use('/', authRoutes)
 app.use('/admin', auth, isAdmin, adminRoutes)
 app.use('/employee', auth, isEmployee, employeeRoutes)
-// Create a catch-all route for testing the installation.
-// app.get('*', (req, res) => res.status(200).send({
-//   message: 'Hello World!',
-// }));
-const port = 5000;
+
+//The 404 Route (ALWAYS Keep this as the last route)
+app.get('*', (req, res) => {
+  res.status(404).send('404 Error - not found');
+});
+
+
 app.listen(port, () => {
   console.log('App is now running at port ', port)
 })
+
+// app.on('error', onError);
+// app.on('listening', onListening);
