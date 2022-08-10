@@ -3,6 +3,8 @@ import { verifyToken } from "../helper/tokenHelper"
 import jwt from "jsonwebtoken"
 import redisClient from "../../redisConnect"
 
+const secretAccessToken = process.env.JWT_ACCESS_SECRET
+
 export default async (req, res, next) => {
   try {
     // check token exists
@@ -12,6 +14,7 @@ export default async (req, res, next) => {
     // check token validity
     if (req.headers.authorization && req.headers.authorization.split(" ")[0] === "Bearer") {
       const accessToken = req.headers.authorization.split(" ")[1];
+      console.log("accessToken", accessToken)
       const verified = jwt.verify(accessToken, secretAccessToken);
       req.user = verified.user;
       req.accessToken = accessToken;
@@ -29,6 +32,7 @@ export default async (req, res, next) => {
       return sendErrorResponse(res, 401, 'Your session is not valid');
     }
   } catch (error) {
-
+    console.log("auth error", error)
+    return sendErrorResponse(res, 401, error.message);
   }
 }

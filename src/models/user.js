@@ -68,7 +68,7 @@ export default (sequelize, DataTypes) => {
 
   // need to use in development only
   // if (process.env.NODE_ENV === "development") {
-  //   User.sync({ force: true })
+  //   User.sync({ alter: true })
   // }
   User.associate = ((models) => {
     User.hasMany(models.Employee, {
