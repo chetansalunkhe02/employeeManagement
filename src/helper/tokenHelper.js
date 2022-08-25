@@ -33,7 +33,6 @@ const generateAccessToken = (user) => {
 }
 
 const generateRefreshToken = (user) => {
-  console.log("user", user)
   // save refresh token in redis store
   let refreshToken = jwt.sign({ user }, secretRefreshToken, { expiresIn: timeRefreshToken });
   let userId = user.id
